@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import request from 'request-promise';
 import AzureMetricApiClient from './azureMetricApiClient';
-import type { Subscription} from './azureMetricClasses';
+import type { Subscription, AuthToken, AppServicePlanProperties, AppServicePlan, Sku} from './azureMetricClasses';
 let azureMetricApiClient = new AzureMetricApiClient(request, process.env);
 // let azureMetricLogger = new AzureMetricLogger(console);
 import express from 'express';
@@ -21,10 +21,13 @@ app.get('/', async function (req, res) {
 
     let subscriptions = await azureMetricApiClient.getAllSubscriptions(authToken.access_token);
 
-    subscriptions.value.forEach((subscription : Subscription) => {
-        console.log();
+    for(let subscription of subscriptions.value){
+        console.log('---------------------------------------------------');
         console.log(`${subscription.id} | ${subscription.displayName}`);
-    });
+        const appServicePlans = await azureMetricApiClient.getAllAppServicePlansBySubscription(authToken.access_token, subscription.id);
+        console.log(appServicePlans.value);
+        console.log('---------------------------------------------------');
+    }
 
     res.send('Azure Metrics');
 });

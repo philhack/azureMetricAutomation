@@ -1,5 +1,5 @@
 // @flow
-import {Subscription, AuthToken} from './azureMetricClasses';
+import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku} from './azureMetricClasses';
 import querystring from 'querystring';
 'use strict';
 
@@ -17,6 +17,22 @@ export default class AzureMetricApiClient {
             uri: `${this.environment.AZURE_MANAGEMENT_URL}/subscriptions`,
             qs: {
                 'api-version': '2016-06-01'
+            },
+            auth: {
+                'bearer': authToken
+            },
+            json: true
+        };
+
+        return await this.request(options);
+    };
+
+    async getAllAppServicePlansBySubscription(authToken: string, subscriptionId: string): Promise<Array<AppServicePlan>> {
+        let options = {
+            uri: `${this.environment.AZURE_MANAGEMENT_URL}/${subscriptionId}/providers/Microsoft.Web/serverfarms`,
+            qs: {
+                'api-version': '2016-09-01',
+                'detailed': 'true'
             },
             auth: {
                 'bearer': authToken
