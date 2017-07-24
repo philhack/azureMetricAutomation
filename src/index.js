@@ -17,10 +17,7 @@ dotenv.load();
 
 app.get('/', async function (req, res) {
 
-    // let authToken = process.env.AUTH_TOKEN;
-    console.log('getting auth token');
     let authToken = await azureMetricApiClient.getAuthToken();
-    console.log(authToken);
 
     let subscriptions = await azureMetricApiClient.getAllSubscriptions(authToken.access_token);
 
