@@ -1,5 +1,5 @@
 // @flow
-import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku} from './azureMetricClasses';
+import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku, MemoryPercentageResult} from './azureMetricClasses';
 import querystring from 'querystring';
 'use strict';
 
@@ -32,7 +32,7 @@ export default class AzureMetricApiClient {
             uri: `${this.environment.AZURE_MANAGEMENT_URL}/${subscriptionId}/providers/Microsoft.Web/serverfarms`,
             qs: {
                 'api-version': '2016-09-01',
-                'detailed': 'true'
+                'details': 'true'
             },
             auth: {
                 'bearer': authToken
@@ -41,6 +41,31 @@ export default class AzureMetricApiClient {
         };
 
         return await this.request(options);
+    };
+
+    async getMemoryUsageForAppServicePlan(authToken: string, appServicePlanId: string): Promise<MemoryPercentageResult> {
+        let url = `${this.environment.AZURE_MANAGEMENT_URL}${appServicePlanId}/providers/microsoft.insights/metrics`;
+        console.log(url);
+
+        let options = {
+            uri: url,
+            qs: {
+                'api-version': '2016-06-01',
+                'details': 'true',
+                '$filter': "(name.value eq 'MemoryPercentage') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq 2017-07-01 and endTime eq 2017-07-15 and timeGrain eq duration'PT1H'"
+            },
+            auth: {
+                'bearer': authToken
+            },
+            json: true
+        };
+
+        try {
+            return await this.request(options);
+        } catch(error){
+            console.log(error.message);
+            return undefined;
+        }
     };
 
     async getAuthToken(): Promise<AuthToken> {

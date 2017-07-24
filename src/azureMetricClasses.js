@@ -31,3 +31,23 @@ export class AppServicePlan{
     properties: AppServicePlanProperties;
     sku: Sku;
 }
+
+export class AppServicePlanMetric{
+    timeStamp: Date;
+    average: number;
+    maximum: number
+}
+
+export class MetricName{
+    value: string;
+    localizedValue: string;
+}
+
+export class MemoryPercentageResult{
+    value: [{
+            data: Array<AppServicePlanMetric>;
+            name: MetricName;
+            id: string
+        }
+    ]
+}
