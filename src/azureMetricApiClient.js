@@ -1,5 +1,6 @@
 // @flow
-import {Subscription} from "./azureMetricClasses";
+import {Subscription, AuthToken} from './azureMetricClasses';
+import querystring from 'querystring';
 'use strict';
 
 export default class AzureMetricApiClient {
@@ -13,7 +14,7 @@ export default class AzureMetricApiClient {
 
     async getAllSubscriptions(authToken: string): Promise<Array<Subscription>> {
         let options = {
-            uri: `${this.environment.AZURE_MANAGEMENT_URL}/subscriptions?api-version=2016-06-01`,
+            uri: `${this.environment.AZURE_MANAGEMENT_URL}/subscriptions`,
             qs: {
                 'api-version': '2016-06-01'
             },
@@ -21,6 +22,37 @@ export default class AzureMetricApiClient {
                 'bearer': authToken
             },
             json: true
+        };
+
+        return await this.request(options);
+    };
+
+    async getAuthToken(): Promise<AuthToken> {
+        let form = {
+            grant_type: 'client_credentials',
+            resource: 'https://management.core.windows.net/',
+            client_id: this.environment.AZURE_CLIENT_ID,
+            client_secret: this.environment.AZURE_CLIENT_SECRET
+        };
+
+        let formData = querystring.stringify(form);
+        let contentLength = formData.length;
+
+
+        let options = {
+            uri: `${this.environment.AZURE_LOGIN_URL}/${this.environment.AZURE_TENANT_ID}/oauth2/token`,
+            qs: {
+                'api-version': '1.0'
+            },
+            headers: {
+                'Content-Length': contentLength,
+                'content-type': 'application/x-www-form-urlencoded'
+            },
+            json: true,
+            method: 'POST',
+            body: formData
+
+
         };
 
         return await this.request(options);

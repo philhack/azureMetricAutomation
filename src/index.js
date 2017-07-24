@@ -17,16 +17,17 @@ dotenv.load();
 
 app.get('/', async function (req, res) {
 
-    let authToken = process.env.AUTH_TOKEN;
+    // let authToken = process.env.AUTH_TOKEN;
+    console.log('getting auth token');
+    let authToken = await azureMetricApiClient.getAuthToken();
+    console.log(authToken);
 
-    let subscriptions = await azureMetricApiClient.getAllSubscriptions(authToken);
+    let subscriptions = await azureMetricApiClient.getAllSubscriptions(authToken.access_token);
 
     subscriptions.value.forEach((subscription : Subscription) => {
         console.log();
         console.log(`${subscription.id} | ${subscription.displayName}`);
     });
-
-
 
     res.send('Azure Metrics');
 });

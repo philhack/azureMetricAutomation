@@ -40,6 +40,7 @@
     "moment-timezone": "^0.5.13",
     "node-rest-client": "^2.0.1",
     "number-is-nan": "^1.0.1",
+    "querystring": "^0.2.0",
     "request": "^2.81.0",
     "request-promise": "^4.1.1",
     "util": "^0.10.3"
