@@ -33,8 +33,14 @@ app.get('/', async function (req, res) {
             console.log(`${appServicePlan.name}`);
             const appServicePlanMemoryUsage  = await azureMetricApiClient.getMemoryUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
             if(appServicePlanMemoryUsage){
-                // todo: write a function that will take the max and avaerage for all of the values returned in the array
-                console.log(`${appServicePlanMemoryUsage.value[0].name.value}: ${appServicePlanMemoryUsage.value[0].data[0].average}`);
+                let average = _.maxBy(appServicePlanMemoryUsage.value[0].data, (d) => {
+                   return d.average;
+                });
+
+                let maximum = _.maxBy(appServicePlanMemoryUsage.value[0].data, (d) => {
+                    return d.maximum;
+                });
+                console.log(`${appServicePlanMemoryUsage.value[0].name.value}| avg: ${_.round(average.average, 1)} | max: ${_.round(maximum.maximum, 1)}`);
             }
         }
 
