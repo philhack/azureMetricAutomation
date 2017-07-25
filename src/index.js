@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import request from 'request-promise';
 import AzureMetricApiClient from './azureMetricApiClient';
-import type { Subscription, AuthToken, AppServicePlanProperties, AppServicePlan, Sku, MemoryPercentageResult} from './azureMetricClasses';
+import type { Subscription, AuthToken, AppServicePlanProperties, AppServicePlan, Sku, MemoryPercentageResult, CpuPercentageResult} from './azureMetricClasses';
 let azureMetricApiClient = new AzureMetricApiClient(request, process.env);
 // let azureMetricLogger = new AzureMetricLogger(console);
 import express from 'express';
@@ -23,14 +23,15 @@ app.get('/', async function (req, res) {
 
     for(let subscription: Subscription of subscriptions.value){
         console.log('---------------------------------------------------');
-        console.log(`${subscription.id} | ${subscription.displayName}`);
+        console.log(`Subscription: ${subscription.displayName}`);
         const appServicePlans = await azureMetricApiClient.getAllAppServicePlansBySubscription(authToken.access_token, subscription.id);
         //console.log(appServicePlans.value);
 
 
         for(let appServicePlan: AppServicePlan of appServicePlans.value){
-            console.log('---------------------------------------------------');
-            console.log(`${appServicePlan.name}`);
+            console.log(`App Service Plan: ${appServicePlan.name}`);
+
+            // get memory usage for app service plan
             const appServicePlanMemoryUsage  = await azureMetricApiClient.getMemoryUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
             if(appServicePlanMemoryUsage){
                 let average = _.maxBy(appServicePlanMemoryUsage.value[0].data, (d) => {
@@ -40,10 +41,23 @@ app.get('/', async function (req, res) {
                 let maximum = _.maxBy(appServicePlanMemoryUsage.value[0].data, (d) => {
                     return d.maximum;
                 });
-                console.log(`${appServicePlanMemoryUsage.value[0].name.value}| avg: ${_.round(average.average, 1)} | max: ${_.round(maximum.maximum, 1)}`);
+                console.log(` * ${appServicePlanMemoryUsage.value[0].name.value}| avg: ${_.round(average.average, 1)}% | max: ${_.round(maximum.maximum, 1)}%`);
+            }
+
+            // get cpu usage for app service plan
+            const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
+            if(appServicePlanCpuUsage){
+                let average = _.maxBy(appServicePlanCpuUsage.value[0].data, (d) => {
+                    return d.average;
+                });
+
+                let maximum = _.maxBy(appServicePlanCpuUsage.value[0].data, (d) => {
+                    return d.maximum;
+                });
+                console.log(` * ${appServicePlanCpuUsage.value[0].name.value}| avg: ${_.round(average.average, 1)}% | max: ${_.round(maximum.maximum, 1)}%`);
             }
         }
-
+        console.log('---------------------------------------------------');
     }
 
     res.send('Azure Metrics');

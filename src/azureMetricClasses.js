@@ -51,3 +51,11 @@ export class MemoryPercentageResult{
         }
     ]
 }
+export class CpuPercentageResult{
+    value: [{
+            data: Array<AppServicePlanMetric>;
+            name: MetricName;
+            id: string
+        }
+    ]
+}
