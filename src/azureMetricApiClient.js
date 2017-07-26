@@ -39,7 +39,6 @@ export default class AzureMetricApiClient {
             },
             json: true
         };
-
         return await this.request(options);
     };
 
