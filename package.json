@@ -1,5 +1,5 @@
 {
-  "name": "slashroom",
+  "name": "azureMetricAutomation",
   "version": "1.0.0",
   "description": "Get Azure Web App and App Service Plan Stats",
   "main": "app.js",
