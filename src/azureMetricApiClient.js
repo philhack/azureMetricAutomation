@@ -1,5 +1,5 @@
 // @flow
-import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku, MemoryPercentageResult, CpuPercentageResult} from './azureMetricClasses';
+import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku, MemoryPercentageResult, CpuPercentageResult, WebApp} from './azureMetricClasses';
 import querystring from 'querystring';
 'use strict';
 
@@ -88,6 +88,23 @@ export default class AzureMetricApiClient {
             console.log(error.message);
             return undefined;
         }
+    };
+
+
+    async getAllAppWebApps(authToken: string, appServicePlanId: string, ): Promise<Array<WebApp>> {
+        let url = `${this.environment.AZURE_MANAGEMENT_URL}${appServicePlanId}/providers/Microsoft.Web/sites`;
+
+        let options = {
+            uri: `${this.environment.AZURE_MANAGEMENT_URL}/${subscriptionId}/providers/Microsoft.Web/serverfarms`,
+            qs: {
+                'api-version': '2016-08-01'
+            },
+            auth: {
+                'bearer': authToken
+            },
+            json: true
+        };
+        return await this.request(options);
     };
 
     async getAuthToken(): Promise<AuthToken> {

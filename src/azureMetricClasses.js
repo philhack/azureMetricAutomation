@@ -59,3 +59,8 @@ export class CpuPercentageResult{
         }
     ]
 }
+
+export class WebApp{
+    id: string;
+    name: string;
+}
