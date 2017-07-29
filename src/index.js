@@ -63,10 +63,35 @@ app.get('/', async function (req, res) {
             });
 
             for(let webApp: WebApp of webApps){
-                appServicePlanDetails.webApps.push({
-                    id: webApp.id,
-                    name: webApp.name
-                })
+
+                console.log(`Getting stats for web app: ${webApp.name}`);
+
+                const webAppMemoryWorkingSet  = await azureMetricApiClient.getMemoryWorkingSetForWebApp(authToken.access_token, subscription.id, webApp.properties.resourceGroup, webApp.name);
+
+                if(webAppMemoryWorkingSet){
+                    let averageMemoryInBytes = _.maxBy(webAppMemoryWorkingSet.value[0].data, (d) => {
+                        return d.average;
+                    });
+
+                    let maximumMemoryInBytes = _.maxBy(webAppMemoryWorkingSet.value[0].data, (d) => {
+                        return d.maximum;
+                    });
+                    console.log(` * ${webAppMemoryWorkingSet.value[0].name.value}| avg: ${_.round(averageMemoryInBytes.average, 1)} bytes | max: ${_.round(maximumMemoryInBytes.maximum, 1)} bytes`);
+
+                    appServicePlanDetails.webApps.push({
+                        id: webApp.id,
+                        name: webApp.name,
+                        averageMemoryInMb: _.round(((averageMemoryInBytes.average / 1024) / 1024),0),
+                        maximumMemoryInMb: _.round(((maximumMemoryInBytes.maximum / 1024) / 1024),0)
+                    });
+                } else {
+                    appServicePlanDetails.webApps.push({
+                        id: webApp.id,
+                        name: webApp.name,
+                        averageMemoryInMb: 0,
+                        maximumMemoryInMb: 0,
+                    });
+                }
             }
 
             overall[subscriptionIndex].appServicePlans.push(appServicePlanDetails);

@@ -33,7 +33,7 @@ export class AppServicePlan{
     sku: Sku;
 }
 
-export class AppServicePlanMetric{
+export class Metric{
     timeStamp: Date;
     average: number;
     maximum: number
@@ -46,7 +46,7 @@ export class MetricName{
 
 export class MemoryPercentageResult{
     value: [{
-            data: Array<AppServicePlanMetric>;
+            data: Array<Metric>;
             name: MetricName;
             id: string
         }
@@ -54,15 +54,24 @@ export class MemoryPercentageResult{
 }
 export class CpuPercentageResult{
     value: [{
-            data: Array<AppServicePlanMetric>;
+            data: Array<Metric>;
             name: MetricName;
             id: string
         }
     ]
 }
 
+export class MemoryWorkingSeteResult{
+    value: [{
+        data: Array<Metric>;
+        name: MetricName;
+        id: string
+    }]
+}
+
 export class WebAppProperties{
     serverFarmId: string;
+    resourceGroup: string;
 }
 
 export class WebApp{
