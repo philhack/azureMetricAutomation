@@ -114,9 +114,8 @@ export default class AzureMetricApiClient {
         }
     };
 
-
-    async getAllAppWebApps(authToken: string, subscriptionId: string, resourceGroupName: string ): Promise<Array<WebApp>> {
-        let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.Web/sites`;
+    async getAllAppWebApps(authToken: string, subscriptionId: string): Promise<Array<WebApp>> {
+        let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/providers/Microsoft.Web/sites`;
 
         let options = {
             uri: uri,

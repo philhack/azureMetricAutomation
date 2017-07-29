@@ -35,6 +35,8 @@ app.get('/', async function (req, res) {
 
         const appServicePlans = await azureMetricApiClient.getAllAppServicePlansBySubscription(authToken.access_token, subscription.id);
 
+        let webApps = await azureMetricApiClient.getAllAppWebApps(authToken.access_token, subscription.id);
+
         for(let appServicePlan: AppServicePlan of appServicePlans.value){
             console.log(`App Service Plan: ${appServicePlan.name}`);
 
@@ -56,13 +58,11 @@ app.get('/', async function (req, res) {
             const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
             appServicePlanDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
-
-            let webApps = await azureMetricApiClient.getAllAppWebApps(authToken.access_token, subscription.id, appServicePlan.properties.resourceGroup);
-            webApps = _.filter(webApps.value, function (item) {
+            let webAppsInAppServicePlan = _.filter(webApps.value, function (item) {
                 return item.properties.serverFarmId === appServicePlanDetails.id;
             });
 
-            for(let webApp: WebApp of webApps){
+            for(let webApp: WebApp of webAppsInAppServicePlan){
 
                 console.log(`Getting stats for web app: ${webApp.name}`);
 
