@@ -22,6 +22,7 @@ export class Sku {
 
 export class AppServicePlanProperties{
     numberOfSites: number;
+    resourceGroup: string;
 }
 
 export class AppServicePlan{
@@ -58,4 +59,14 @@ export class CpuPercentageResult{
             id: string
         }
     ]
+}
+
+export class WebAppProperties{
+    serverFarmId: string;
+}
+
+export class WebApp{
+    id: string;
+    name: string;
+    properties: WebAppProperties;
 }

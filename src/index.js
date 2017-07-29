@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import request from 'request-promise';
 import AzureMetricApiClient from './azureMetricApiClient';
-import type { Subscription, AuthToken, AppServicePlanProperties, AppServicePlan, Sku, MemoryPercentageResult, CpuPercentageResult} from './azureMetricClasses';
+import type { Subscription, AuthToken, AppServicePlanProperties, AppServicePlan, Sku, MemoryPercentageResult, CpuPercentageResult, WebApp} from './azureMetricClasses';
 let azureMetricApiClient = new AzureMetricApiClient(request, process.env);
 // let azureMetricLogger = new AzureMetricLogger(console);
 import express from 'express';
@@ -34,8 +34,6 @@ app.get('/', async function (req, res) {
         });
 
         const appServicePlans = await azureMetricApiClient.getAllAppServicePlansBySubscription(authToken.access_token, subscription.id);
-        //console.log(appServicePlans.value);
-
 
         for(let appServicePlan: AppServicePlan of appServicePlans.value){
             console.log(`App Service Plan: ${appServicePlan.name}`);
@@ -44,7 +42,7 @@ app.get('/', async function (req, res) {
                return o.subscription.id == subscription.id;
             });
 
-            let webAppDetails = {
+            let appServicePlanDetails = {
                 id: appServicePlan.id,
                 name: appServicePlan.name,
                 location: appServicePlan.location,
@@ -53,12 +51,25 @@ app.get('/', async function (req, res) {
             };
 
             const appServicePlanMemoryUsage  = await azureMetricApiClient.getMemoryUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
-            webAppDetails = appendMemoryUsageForAppServicePlan(appServicePlanMemoryUsage, authToken.access_token, appServicePlan.id, webAppDetails);
+            appServicePlanDetails = appendMemoryUsageForAppServicePlan(appServicePlanMemoryUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
             const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
-            webAppDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, webAppDetails);
+            appServicePlanDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
-            overall[subscriptionIndex].appServicePlans.push(webAppDetails);
+
+            let webApps = await azureMetricApiClient.getAllAppWebApps(authToken.access_token, subscription.id, appServicePlan.properties.resourceGroup);
+            webApps = _.filter(webApps.value, function (item) {
+                return item.properties.serverFarmId === appServicePlanDetails.id;
+            });
+
+            for(let webApp: WebApp of webApps){
+                appServicePlanDetails.webApps.push({
+                    id: webApp.id,
+                    name: webApp.name
+                })
+            }
+
+            overall[subscriptionIndex].appServicePlans.push(appServicePlanDetails);
         }
         console.log('---------------------------------------------------');
     }
