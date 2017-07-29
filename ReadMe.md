@@ -41,5 +41,4 @@ start-local
 ## WIP
 This project is Work In Progress. There are still a few steps needs to get it fully functional, namely:
 
-* Getting the Web App's
 * Passing in parameters, such as the start date, end date, time grade
