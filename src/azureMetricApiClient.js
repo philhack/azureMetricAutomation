@@ -1,5 +1,5 @@
 // @flow
-import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku, MemoryPercentageResult, CpuPercentageResult, WebApp} from './azureMetricClasses';
+import {Subscription, AuthToken, AppServicePlan, AppServicePlanProperties, Sku, MemoryPercentageResult, CpuPercentageResult, WebApp, MemoryWorkingSeteResult} from './azureMetricClasses';
 import querystring from 'querystring';
 'use strict';
 
@@ -91,8 +91,31 @@ export default class AzureMetricApiClient {
     };
 
 
-    async getAllAppWebApps(authToken: string, subscriptionId: string, resourceGroupName: string ): Promise<Array<WebApp>> {
-        let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.Web/sites`;
+    async getMemoryWorkingSetForWebApp(authToken: string, subscriptionId: string, resourceGroupName: string, webAppName: string): Promise<MemoryWorkingSeteResult> {
+        let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.Web/sites/${webAppName}/providers/microsoft.insights/metrics`;
+        let options = {
+            uri: uri,
+            qs: {
+                'api-version': '2016-06-01',
+                'details': 'true',
+                '$filter': "(name.value eq 'MemoryWorkingSet') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq 2017-07-01 and endTime eq 2017-07-15 and timeGrain eq duration'PT1H'"
+            },
+            auth: {
+                'bearer': authToken
+            },
+            json: true
+        };
+
+        try {
+            return await this.request(options);
+        } catch(error){
+            console.log(error.message);
+            return undefined;
+        }
+    };
+
+    async getAllAppWebApps(authToken: string, subscriptionId: string): Promise<Array<WebApp>> {
+        let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/providers/Microsoft.Web/sites`;
 
         let options = {
             uri: uri,

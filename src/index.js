@@ -35,6 +35,8 @@ app.get('/', async function (req, res) {
 
         const appServicePlans = await azureMetricApiClient.getAllAppServicePlansBySubscription(authToken.access_token, subscription.id);
 
+        let webApps = await azureMetricApiClient.getAllAppWebApps(authToken.access_token, subscription.id);
+
         for(let appServicePlan: AppServicePlan of appServicePlans.value){
             console.log(`App Service Plan: ${appServicePlan.name}`);
 
@@ -56,17 +58,40 @@ app.get('/', async function (req, res) {
             const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
             appServicePlanDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
-
-            let webApps = await azureMetricApiClient.getAllAppWebApps(authToken.access_token, subscription.id, appServicePlan.properties.resourceGroup);
-            webApps = _.filter(webApps.value, function (item) {
+            let webAppsInAppServicePlan = _.filter(webApps.value, function (item) {
                 return item.properties.serverFarmId === appServicePlanDetails.id;
             });
 
-            for(let webApp: WebApp of webApps){
-                appServicePlanDetails.webApps.push({
-                    id: webApp.id,
-                    name: webApp.name
-                })
+            for(let webApp: WebApp of webAppsInAppServicePlan){
+
+                console.log(`Getting stats for web app: ${webApp.name}`);
+
+                const webAppMemoryWorkingSet  = await azureMetricApiClient.getMemoryWorkingSetForWebApp(authToken.access_token, subscription.id, webApp.properties.resourceGroup, webApp.name);
+
+                if(webAppMemoryWorkingSet){
+                    let averageMemoryInBytes = _.maxBy(webAppMemoryWorkingSet.value[0].data, (d) => {
+                        return d.average;
+                    });
+
+                    let maximumMemoryInBytes = _.maxBy(webAppMemoryWorkingSet.value[0].data, (d) => {
+                        return d.maximum;
+                    });
+                    console.log(` * ${webAppMemoryWorkingSet.value[0].name.value}| avg: ${_.round(averageMemoryInBytes.average, 1)} bytes | max: ${_.round(maximumMemoryInBytes.maximum, 1)} bytes`);
+
+                    appServicePlanDetails.webApps.push({
+                        id: webApp.id,
+                        name: webApp.name,
+                        averageMemoryInMb: _.round(((averageMemoryInBytes.average / 1024) / 1024),0),
+                        maximumMemoryInMb: _.round(((maximumMemoryInBytes.maximum / 1024) / 1024),0)
+                    });
+                } else {
+                    appServicePlanDetails.webApps.push({
+                        id: webApp.id,
+                        name: webApp.name,
+                        averageMemoryInMb: 0,
+                        maximumMemoryInMb: 0,
+                    });
+                }
             }
 
             overall[subscriptionIndex].appServicePlans.push(appServicePlanDetails);
