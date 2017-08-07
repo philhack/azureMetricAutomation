@@ -23,6 +23,7 @@ AZURE_CLIENT_SECRET=<your_client_secret_id>
 AZURE_MANAGEMENT_URL="https://management.azure.com"
 AZURE_LOGIN_URL="https://login.microsoftonline.com"
 PORT=8000
+API_KEY=sampleKey
 ```
 
 * Install the packages
@@ -35,10 +36,5 @@ npm i
 start-local
 ```
 
-* Browse to [http://localhost:8000](http://localhost:8000). When you hit this endpoint, it will fetch hit the Azure REST API's to collect and aggregate your data and display a JSON payload.
-
-
-## WIP
-This project is Work In Progress. There are still a few steps needs to get it fully functional, namely:
-
-* Passing in parameters, such as the start date, end date, time grade
+* Browse to [http://localhost:8000](http://localhost:8000).
+* Browse to [http://localhost:8000/all?startDate=2017-07-01&endDate=2017-07-30&apiKey=sampleKey](http://localhost:8000/all?startDate=2017-07-01&endDate=2017-07-30&apiKey=sampleKey). When you hit this endpoint, it will fetch hit the Azure REST API's to collect and aggregate your data and display a JSON payload.

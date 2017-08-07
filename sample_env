@@ -4,3 +4,4 @@ AZURE_CLIENT_SECRET=
 AZURE_MANAGEMENT_URL="https://management.azure.com"
 AZURE_LOGIN_URL="https://login.microsoftonline.com"
 PORT=8000
+API_KEY=sampleKey
