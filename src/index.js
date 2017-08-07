@@ -16,11 +16,20 @@ const app = express();
 dotenv.load();
 
 app.get('/', async function (req, res) {
+    res.send('Sample:  /all/?startDate=2017-07-01&endDate=2017-07-15');
+});
+
+app.get('/all', async function (req, res) {
 
     let authToken = await azureMetricApiClient.getAuthToken();
     var overall = [];
+    var startDate = req.query.startDate;
+    var endDate = req.query.endDate;
 
     let subscriptions = await azureMetricApiClient.getAllSubscriptions(authToken.access_token);
+
+    console.log(`${startDate}`);
+    console.log(`${endDate}`);
 
     for(let subscription: Subscription of subscriptions.value){
         console.log('---------------------------------------------------');
@@ -52,10 +61,10 @@ app.get('/', async function (req, res) {
                 webApps: []
             };
 
-            const appServicePlanMemoryUsage  = await azureMetricApiClient.getMemoryUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
+            const appServicePlanMemoryUsage  = await azureMetricApiClient.getMemoryUsageForAppServicePlan(authToken.access_token, appServicePlan.id, startDate, endDate);
             appServicePlanDetails = appendMemoryUsageForAppServicePlan(appServicePlanMemoryUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
-            const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id);
+            const appServicePlanCpuUsage  = await azureMetricApiClient.getCpuUsageForAppServicePlan(authToken.access_token, appServicePlan.id, startDate, endDate);
             appServicePlanDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
             let webAppsInAppServicePlan = _.filter(webApps.value, function (item) {
@@ -66,7 +75,7 @@ app.get('/', async function (req, res) {
 
                 console.log(`Getting stats for web app: ${webApp.name}`);
 
-                const webAppMemoryWorkingSet  = await azureMetricApiClient.getMemoryWorkingSetForWebApp(authToken.access_token, subscription.id, webApp.properties.resourceGroup, webApp.name);
+                const webAppMemoryWorkingSet  = await azureMetricApiClient.getMemoryWorkingSetForWebApp(authToken.access_token, subscription.id, webApp.properties.resourceGroup, webApp.name, startDate, endDate);
 
                 if(webAppMemoryWorkingSet){
                     let averageMemoryInBytes = _.maxBy(webAppMemoryWorkingSet.value[0].data, (d) => {
