@@ -42,7 +42,7 @@ export default class AzureMetricApiClient {
         return await this.request(options);
     };
 
-    async getMemoryUsageForAppServicePlan(authToken: string, appServicePlanId: string): Promise<MemoryPercentageResult> {
+    async getMemoryUsageForAppServicePlan(authToken: string, appServicePlanId: string, startDate: string, endDate: string): Promise<MemoryPercentageResult> {
         let url = `${this.environment.AZURE_MANAGEMENT_URL}${appServicePlanId}/providers/microsoft.insights/metrics`;
 
         let options = {
@@ -50,7 +50,7 @@ export default class AzureMetricApiClient {
             qs: {
                 'api-version': '2016-06-01',
                 'details': 'true',
-                '$filter': "(name.value eq 'MemoryPercentage') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq 2017-07-01 and endTime eq 2017-07-15 and timeGrain eq duration'PT1H'"
+                '$filter': `(name.value eq 'MemoryPercentage') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq ${startDate} and endTime eq ${endDate} and timeGrain eq duration'PT1H'`
             },
             auth: {
                 'bearer': authToken
@@ -66,7 +66,7 @@ export default class AzureMetricApiClient {
         }
     };
 
-    async getCpuUsageForAppServicePlan(authToken: string, appServicePlanId: string): Promise<CpuPercentageResult> {
+    async getCpuUsageForAppServicePlan(authToken: string, appServicePlanId: string, startDate: string, endDate: string): Promise<CpuPercentageResult> {
         let url = `${this.environment.AZURE_MANAGEMENT_URL}${appServicePlanId}/providers/microsoft.insights/metrics`;
 
         let options = {
@@ -74,7 +74,7 @@ export default class AzureMetricApiClient {
             qs: {
                 'api-version': '2016-06-01',
                 'details': 'true',
-                '$filter': "(name.value eq 'CpuPercentage') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq 2017-07-01 and endTime eq 2017-07-15 and timeGrain eq duration'PT1H'"
+                '$filter': `(name.value eq 'CpuPercentage') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq ${startDate} and endTime eq ${endDate} and timeGrain eq duration'PT1H'`
             },
             auth: {
                 'bearer': authToken
@@ -91,14 +91,14 @@ export default class AzureMetricApiClient {
     };
 
 
-    async getMemoryWorkingSetForWebApp(authToken: string, subscriptionId: string, resourceGroupName: string, webAppName: string): Promise<MemoryWorkingSeteResult> {
+    async getMemoryWorkingSetForWebApp(authToken: string, subscriptionId: string, resourceGroupName: string, webAppName: string, startDate: string, endDate: string): Promise<MemoryWorkingSeteResult> {
         let uri = `${this.environment.AZURE_MANAGEMENT_URL}${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.Web/sites/${webAppName}/providers/microsoft.insights/metrics`;
         let options = {
             uri: uri,
             qs: {
                 'api-version': '2016-06-01',
                 'details': 'true',
-                '$filter': "(name.value eq 'MemoryWorkingSet') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq 2017-07-01 and endTime eq 2017-07-15 and timeGrain eq duration'PT1H'"
+                '$filter': `(name.value eq 'MemoryWorkingSet') and (aggregationType eq 'Maximum' or aggregationType eq 'Average') and startTime eq ${startDate} and endTime eq ${endDate} and timeGrain eq duration'PT1H'`
             },
             auth: {
                 'bearer': authToken
