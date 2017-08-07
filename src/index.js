@@ -63,7 +63,6 @@ app.get('/all', async function (req, res) {
                 });
 
                 let appServicePlanDetails = {
-                    id: appServicePlan.id,
                     name: appServicePlan.name,
                     location: appServicePlan.location,
                     sku: appServicePlan.sku.name,
@@ -77,7 +76,7 @@ app.get('/all', async function (req, res) {
                 appServicePlanDetails = appendCpuUsageForAppServicePlan(appServicePlanCpuUsage, authToken.access_token, appServicePlan.id, appServicePlanDetails);
 
                 let webAppsInAppServicePlan = _.filter(webApps.value, function (item) {
-                    return item.properties.serverFarmId === appServicePlanDetails.id;
+                    return item.properties.serverFarmId === appServicePlan.id;
                 });
 
                 for(let webApp: WebApp of webAppsInAppServicePlan){
@@ -97,14 +96,12 @@ app.get('/all', async function (req, res) {
                         console.log(` * ${webAppMemoryWorkingSet.value[0].name.value}| avg: ${_.round(averageMemoryInBytes.average, 1)} bytes | max: ${_.round(maximumMemoryInBytes.maximum, 1)} bytes`);
 
                         appServicePlanDetails.webApps.push({
-                            id: webApp.id,
                             name: webApp.name,
                             averageMemoryInMb: _.round(((averageMemoryInBytes.average / 1024) / 1024),0),
                             maximumMemoryInMb: _.round(((maximumMemoryInBytes.maximum / 1024) / 1024),0)
                         });
                     } else {
                         appServicePlanDetails.webApps.push({
-                            id: webApp.id,
                             name: webApp.name,
                             averageMemoryInMb: 0,
                             maximumMemoryInMb: 0,
